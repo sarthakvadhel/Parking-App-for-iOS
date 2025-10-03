@@ -11,7 +11,15 @@ import FirebaseAuth
 struct SignupView: View {
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var selectedRole: UserRole = .user
+    @State private var showRoleSelection = false
+    @State private var showError = false
+    @State private var errorMessage = ""
+    @State private var showSuccess = false
+    @State private var isLoading = false
+    
     @AppStorage("uid") var userID: String = ""
+    @AppStorage("userRole") var userRole: String = ""
     @Binding var currentShowingView: String
     
     private func isValidPassword(_ password: String) -> Bool {
@@ -24,13 +32,67 @@ struct SignupView: View {
         return passwordRegex.evaluate(with: password)
     }
     
+    private func signUp() {
+        guard email.isValidEmail() else {
+            errorMessage = "Please enter a valid email address"
+            showError = true
+            return
+        }
+        
+        guard isValidPassword(password) else {
+            errorMessage = "Password must be at least 6 characters with 1 uppercase and 1 special character"
+            showError = true
+            return
+        }
+        
+        isLoading = true
+        
+        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+            isLoading = false
+            
+            if let error = error {
+                errorMessage = error.localizedDescription
+                showError = true
+                return
+            }
+            
+            if let authResult = authResult {
+                let newUser = User(
+                    id: authResult.user.uid,
+                    email: email,
+                    role: selectedRole
+                )
+                
+                Task {
+                    do {
+                        try await FirestoreManager.shared.createUser(newUser)
+                        await MainActor.run {
+                            userID = authResult.user.uid
+                            userRole = selectedRole.rawValue
+                            showSuccess = true
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                showSuccess = false
+                            }
+                        }
+                    } catch {
+                        await MainActor.run {
+                            errorMessage = "Failed to create user profile: \(error.localizedDescription)"
+                            showError = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     var body: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             
             VStack {
                 HStack {
-                    Text("Create an Account!")
+                    Text("Parking with Sarthak")
                         .foregroundColor(.white)
                         .font(.largeTitle)
                         .bold()
@@ -92,6 +154,33 @@ struct SignupView: View {
                 )
                 .padding()
                 
+                // Role Selection
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("I am a:")
+                        .foregroundColor(.white)
+                        .font(.headline)
+                        .padding(.leading)
+                    
+                    HStack(spacing: 15) {
+                        RoleButton(
+                            title: "User (Finding Parking)",
+                            icon: "car.fill",
+                            isSelected: selectedRole == .user
+                        ) {
+                            selectedRole = .user
+                        }
+                        
+                        RoleButton(
+                            title: "Vendor (Providing Space)",
+                            icon: "building.2.fill",
+                            isSelected: selectedRole == .vendor
+                        ) {
+                            selectedRole = .vendor
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.vertical)
                 
                 Button(action: {
                     withAnimation {
@@ -107,41 +196,66 @@ struct SignupView: View {
                 
                 
                 Button {
-                    
-              
-                    Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-                        
-                        if let error = error {
-                            print(error)
-                            return
-                        }
-                        
-                        if let authResult = authResult {
-                            print(authResult.user.uid)
-                            userID = authResult.user.uid
-                            
-                        }
-                    }
-                    
+                    signUp()
                 } label: {
-                    Text("Create New Account")
-                        .foregroundColor(.black)
-                        .font(.title3)
-                        .bold()
-                    
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                    
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.white)
-                        )
-                        .padding(.horizontal)
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        Text("Create New Account")
+                            .foregroundColor(.black)
+                            .font(.title3)
+                            .bold()
+                        
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    }
                 }
-                
-                
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.white)
+                )
+                .padding(.horizontal)
+                .disabled(isLoading)
             }
-            
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+        .alert("Success!", isPresented: $showSuccess) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Account created successfully!")
+        }
+    }
+}
+
+struct RoleButton: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 30))
+                Text(title)
+                    .font(.caption)
+                    .multilineTextAlignment(.center)
+            }
+            .foregroundColor(isSelected ? .black : .white)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(isSelected ? Color.white : Color.white.opacity(0.2))
+            )
         }
     }
 }

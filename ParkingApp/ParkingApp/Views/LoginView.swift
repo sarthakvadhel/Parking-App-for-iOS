@@ -11,12 +11,13 @@ import FirebaseAuth
 struct LoginView: View {
     @Binding var currentShowingView: String
     @AppStorage("uid") var userID: String = ""
-    
+    @AppStorage("userRole") var userRole: String = ""
     
     @State private var email: String = ""
     @State private var password: String = ""
-    
-    
+    @State private var showError = false
+    @State private var errorMessage = ""
+    @State private var isLoading = false
     
     private func isValidPassword(_ password: String) -> Bool {
         // minimum 6 characters long
@@ -28,13 +29,57 @@ struct LoginView: View {
         return passwordRegex.evaluate(with: password)
     }
     
+    private func login() {
+        guard email.isValidEmail() else {
+            errorMessage = "Please enter a valid email address"
+            showError = true
+            return
+        }
+        
+        guard password.count >= 6 else {
+            errorMessage = "Please enter your password"
+            showError = true
+            return
+        }
+        
+        isLoading = true
+        
+        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+            isLoading = false
+            
+            if let error = error {
+                errorMessage = error.localizedDescription
+                showError = true
+                return
+            }
+            
+            if let authResult = authResult {
+                Task {
+                    do {
+                        let user = try await FirestoreManager.shared.fetchUser(userId: authResult.user.uid)
+                        await MainActor.run {
+                            userID = authResult.user.uid
+                            userRole = user.role.rawValue
+                        }
+                    } catch {
+                        await MainActor.run {
+                            errorMessage = "Failed to load user profile"
+                            showError = true
+                            try? Auth.auth().signOut()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     var body: some View {
         ZStack {
             Color.white.edgesIgnoringSafeArea(.all)
             
             VStack {
                 HStack {
-                    Text("Welcome Back!")
+                    Text("Parking with Sarthak")
                         .font(.largeTitle)
                         .bold()
                     
@@ -109,40 +154,38 @@ struct LoginView: View {
                 
                 
                 Button {
-                    Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-                        if let error = error {
-                            print(error)
-                            return
-                        }
-                        
-                        if let authResult = authResult {
-                            print(authResult.user.uid)
-                            withAnimation {
-                                userID = authResult.user.uid
-                            }
-                        }
-                        
-                        
-                    }
+                    login()
                 } label: {
-                    Text("Sign In")
-                        .foregroundColor(.white)
-                        .font(.title3)
-                        .bold()
-                    
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                    
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.black)
-                        )
-                        .padding(.horizontal)
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        Text("Sign In")
+                            .foregroundColor(.white)
+                            .font(.title3)
+                            .bold()
+                        
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    }
                 }
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.black)
+                )
+                .padding(.horizontal)
+                .disabled(isLoading)
                 
                 
             }
             
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
         }
     }
 }

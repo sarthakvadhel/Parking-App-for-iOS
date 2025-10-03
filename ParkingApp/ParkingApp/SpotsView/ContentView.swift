@@ -11,9 +11,13 @@ import MapKit
 struct ContentView: View {
 
     @AppStorage("uid") var userID: String = ""
+    @AppStorage("userRole") var userRole: String = ""
     @StateObject var parkingFinder = ParkingFinder()
 
     @State private var showMenu: Bool = false
+    @State private var showVehicleRegistration = false
+    @State private var showVendorRegistration = false
+    @State private var hasCheckedRegistration = false
 
     // 75% width menu
     private var menuWidth: CGFloat { UIScreen.screenWidth * 0.75 }
@@ -21,8 +25,87 @@ struct ContentView: View {
     var body: some View {
         if userID == "" {
             AuthView()
+        } else if userRole == UserRole.vendor.rawValue {
+            // Vendor flow
+            if !hasCheckedRegistration {
+                ProgressView("Loading...")
+                    .onAppear {
+                        checkVendorRegistration()
+                    }
+            } else {
+                VendorDashboardView()
+                    .sheet(isPresented: $showVendorRegistration) {
+                        VendorRegistrationView()
+                            .onDisappear {
+                                hasCheckedRegistration = false
+                            }
+                    }
+            }
         } else {
-            ZStack(alignment: .leading) {
+            // User flow
+            if !hasCheckedRegistration {
+                ProgressView("Loading...")
+                    .onAppear {
+                        checkUserRegistration()
+                    }
+            } else {
+                userMainView
+                    .sheet(isPresented: $showVehicleRegistration) {
+                        VehicleRegistrationView()
+                            .onDisappear {
+                                hasCheckedRegistration = false
+                            }
+                    }
+            }
+        }
+    }
+    
+    private func checkUserRegistration() {
+        Task {
+            do {
+                let vehicles = try await FirestoreManager.shared.fetchVehicles(userId: userID)
+                await MainActor.run {
+                    hasCheckedRegistration = true
+                    if vehicles.isEmpty {
+                        showVehicleRegistration = true
+                    } else {
+                        // Load active vehicle
+                        if let activeVehicle = vehicles.first(where: { $0.isActive }) {
+                            FirestoreManager.shared.currentVehicle = activeVehicle
+                        }
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    hasCheckedRegistration = true
+                    showVehicleRegistration = true
+                }
+            }
+        }
+    }
+    
+    private func checkVendorRegistration() {
+        Task {
+            do {
+                let parkingLots = try await FirestoreManager.shared.fetchVendorParkingLots(vendorId: userID)
+                await MainActor.run {
+                    hasCheckedRegistration = true
+                    if parkingLots.isEmpty {
+                        showVendorRegistration = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    hasCheckedRegistration = true
+                    showVendorRegistration = true
+                }
+            }
+        }
+    }
+    
+    private var userMainView: some View {
+    private var userMainView: some View {
+        ZStack(alignment: .leading) {
                 // Main content (unchanged position/scale to avoid black bars and stretch)
                 mainContent
                     .allowsHitTesting(!showMenu) // block touches when menu is open

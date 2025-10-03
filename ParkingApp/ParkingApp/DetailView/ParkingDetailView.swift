@@ -64,7 +64,7 @@ struct ParkingDetailView: View {
                 ParkingInfoView(parkingItem: parkingFinder.selectedPlace!, showSelectHourView: $showHourSelectionView, selectedHour: $selectedHour)
                     .padding(.vertical, 20)
                 // payment view
-                PaymentView(selectedHour: $selectedHour, perHourFee: parkingFinder.selectedPlace!.fee)
+                PaymentView(selectedHour: $selectedHour, perHourFee: parkingFinder.selectedPlace!.fee, parkingItem: parkingFinder.selectedPlace)
                     .padding(.bottom, 40)
             }
             .padding()

@@ -4,10 +4,6 @@ A fully functional, production-ready parking space finder and vendor management 
 
 ## Overview
 
-<p float="left">
-<img src="https://github.com/kazimunshimun/ParkingAppUI/raw/main/parking_animation.gif" width="340">
-</p>
-
 ## Features
 
 ### 🔐 Authentication & User Management
@@ -130,10 +126,6 @@ All pricing is displayed in Indian Rupees (₹).
 - [ ] Advanced search filters
 - [ ] Booking history and receipts
 - [ ] Theme customization
-
-## Tutorial
-
-[![Parking app UI Tutorial](http://img.youtube.com/vi/QkRIfAv9nlk/0.jpg)](https://youtu.be/QkRIfAv9nlk)
 
 ## License
 

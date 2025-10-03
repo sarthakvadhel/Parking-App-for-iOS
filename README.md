@@ -106,6 +106,9 @@ A fully functional, production-ready parking space finder and vendor management 
    - Enable Authentication and Firestore in Firebase Console
 4. Build and run the project
 
+### ✅ Project Structure Fixed
+The repository structure has been corrected to work properly with Xcode. All source files are now in the correct `ParkingApp/` directory, and when you open the project in Xcode, all files should appear with white icons (properly referenced) instead of red icons (missing files).
+
 ## Firebase Setup
 
 ### Firestore Collections

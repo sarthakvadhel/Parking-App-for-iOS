@@ -9,53 +9,67 @@ import SwiftUI
 import MapKit
 
 struct ContentView: View {
-
+    
     @AppStorage("uid") var userID: String = ""
     @AppStorage("userRole") var userRole: String = ""
+    @AppStorage("hasSeenWelcome") var hasSeenWelcome: Bool = false
     @StateObject var parkingFinder = ParkingFinder()
-
+    
     @State private var showMenu: Bool = false
     @State private var showVehicleRegistration = false
     @State private var showVendorRegistration = false
     @State private var hasCheckedRegistration = false
-
+    @State private var showWelcome = false
+    
     // 75% width menu
     private var menuWidth: CGFloat { UIScreen.screenWidth * 0.75 }
-
+    
     var body: some View {
-        if userID == "" {
-            AuthView()
-        } else if userRole == UserRole.vendor.rawValue {
-            // Vendor flow
-            if !hasCheckedRegistration {
-                ProgressView("Loading...")
-                    .onAppear {
-                        checkVendorRegistration()
+        ZStack {
+            if !hasSeenWelcome && userID == "" {
+                WelcomeView(showWelcome: $showWelcome)
+                    .onDisappear {
+                        hasSeenWelcome = true
                     }
+            } else if userID == "" {
+                AuthView()
+            } else if userRole == UserRole.vendor.rawValue {
+                // Vendor flow
+                if !hasCheckedRegistration {
+                    ProgressView("Loading...")
+                        .onAppear {
+                            checkVendorRegistration()
+                        }
+                } else {
+                    VendorDashboardView()
+                        .sheet(isPresented: $showVendorRegistration) {
+                            VendorRegistrationView()
+                                .onDisappear {
+                                    hasCheckedRegistration = false
+                                }
+                        }
+                }
             } else {
-                VendorDashboardView()
-                    .sheet(isPresented: $showVendorRegistration) {
-                        VendorRegistrationView()
-                            .onDisappear {
-                                hasCheckedRegistration = false
-                            }
-                    }
+                // User flow
+                if !hasCheckedRegistration {
+                    ProgressView("Loading...")
+                        .onAppear {
+                            checkUserRegistration()
+                        }
+                } else {
+                    userMainView
+                        .sheet(isPresented: $showVehicleRegistration) {
+                            VehicleRegistrationView()
+                                .onDisappear {
+                                    hasCheckedRegistration = false
+                                }
+                        }
+                }
             }
-        } else {
-            // User flow
-            if !hasCheckedRegistration {
-                ProgressView("Loading...")
-                    .onAppear {
-                        checkUserRegistration()
-                    }
-            } else {
-                userMainView
-                    .sheet(isPresented: $showVehicleRegistration) {
-                        VehicleRegistrationView()
-                            .onDisappear {
-                                hasCheckedRegistration = false
-                            }
-                    }
+        }
+        .onAppear {
+            if !hasSeenWelcome && userID == "" {
+                showWelcome = true
             }
         }
     }

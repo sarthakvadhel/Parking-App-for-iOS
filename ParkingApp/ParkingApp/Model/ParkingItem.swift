@@ -9,7 +9,7 @@ import Foundation
 import MapKit
 
 struct ParkingItem: Identifiable {
-    let id = UUID()
+    var id: String = UUID().uuidString
     let name: String
     let address: String
     let photoName: String
@@ -18,4 +18,7 @@ struct ParkingItem: Identifiable {
     let location: CLLocationCoordinate2D
     let fee: CGFloat
     var hour: String
+    var description: String?
+    var lateFee: Double?
+    var terms: String?
 }

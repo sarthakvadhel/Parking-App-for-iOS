@@ -17,10 +17,11 @@ struct ParkingInfoView: View {
         VStack(spacing: 16) {
             Text(parkingItem.name)
                 .font(.system(size: 30, weight: .bold))
+                .foregroundColor(Color.theme.textPrimary)
             
             Text(parkingItem.address)
                 .font(.system(size: 16))
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)
             
             // Description if available
@@ -28,9 +29,10 @@ struct ParkingInfoView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("About")
                         .font(.headline)
+                        .foregroundColor(Color.theme.textPrimary)
                     Text(description)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                         .lineLimit(showFullDescription ? nil : 2)
                     
                     if description.count > 100 {
@@ -49,15 +51,15 @@ struct ParkingInfoView: View {
             
             HStack {
                 Image(systemName: "car.fill")
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.iconSecondary)
                 Text("\(parkingItem.carLimit)")
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.textPrimary)
                     .padding(.trailing, 16)
                 
                 Image(systemName: "indianrupeesign.circle.fill")
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.iconSecondary)
                 Text("₹\(String.init(format: "%0.2f", parkingItem.fee))/h")
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.textPrimary)
                 
                 if let lateFee = parkingItem.lateFee {
                     Image(systemName: "exclamationmark.triangle.fill")
@@ -75,10 +77,10 @@ struct ParkingInfoView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Terms & Conditions")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                     Text(terms)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                         .lineLimit(2)
                 }
                 .padding(.horizontal)

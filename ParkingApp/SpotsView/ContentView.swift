@@ -165,10 +165,10 @@ struct ContentView: View {
                     Spacer()
                     Text("No parking spots available")
                         .font(.headline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                     Text("Please check back later")
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                         .padding(.top, 4)
                     Spacer()
                 }

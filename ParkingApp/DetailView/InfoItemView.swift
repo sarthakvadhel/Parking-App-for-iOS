@@ -14,7 +14,7 @@ struct InfoItemView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white)
+                .fill(Color.theme.cardBackground)
                 .frame(height: 150)
                 .shadow(color: Color.black.opacity(0.05), radius: 10, y: 10)
             
@@ -23,9 +23,10 @@ struct InfoItemView: View {
                     .padding(.bottom, 12)
                 Text(value)
                     .font(.system(size: 16))
+                    .foregroundColor(Color.theme.textPrimary)
                 Text(title)
                     .font(.system(size: 14))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.textSecondary)
             }
         }
     }

@@ -40,7 +40,7 @@ struct VendorRegistrationView: View {
                             .padding(.top)
                         
                         Text("Provide details about your parking space")
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.theme.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.bottom)
                         
@@ -162,7 +162,7 @@ struct VendorRegistrationView: View {
                             dismiss()
                         }) {
                             Text("Skip for Now")
-                                .foregroundColor(.gray)
+                                .foregroundColor(Color.theme.textSecondary)
                         }
                         .padding(.bottom)
                     }

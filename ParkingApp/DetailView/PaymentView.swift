@@ -28,9 +28,10 @@ struct PaymentView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("₹\(String.init(format: "%.2f", totalAmount))")
                     .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(Color.theme.textPrimary)
                 Text("\(String(format: "%.1f", selectedHour/2)) hours")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.textSecondary)
             }
             Spacer()
             Button(action: {
@@ -295,7 +296,7 @@ struct PaymentMethodButton: View {
                 if isDisabled {
                     Text("Coming Soon")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                 } else if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)

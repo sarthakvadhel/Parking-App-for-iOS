@@ -85,13 +85,14 @@ struct LoginView: View {
     
     var body: some View {
         ZStack {
-            Color.white.edgesIgnoringSafeArea(.all)
+            Color.theme.background.edgesIgnoringSafeArea(.all)
             
             VStack {
                 HStack {
                     Text("Parking with Sarthak")
                         .font(.largeTitle)
                         .bold()
+                        .foregroundColor(Color.theme.textPrimary)
                     
                     Spacer()
                 }
@@ -102,7 +103,9 @@ struct LoginView: View {
                 
                 HStack {
                     Image(systemName: "mail")
+                        .foregroundColor(Color.theme.iconSecondary)
                     TextField("Email", text: $email)
+                        .foregroundColor(Color.theme.textPrimary)
                     
                     Spacer()
                     
@@ -118,7 +121,7 @@ struct LoginView: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
                         .stroke(lineWidth: 2)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color.theme.textPrimary)
                     
                 )
                 
@@ -127,7 +130,9 @@ struct LoginView: View {
                 
                 HStack {
                     Image(systemName: "lock")
+                        .foregroundColor(Color.theme.iconSecondary)
                     SecureField("Password", text: $password)
+                        .foregroundColor(Color.theme.textPrimary)
                     
                     Spacer()
                     
@@ -142,7 +147,7 @@ struct LoginView: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
                         .stroke(lineWidth: 2)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color.theme.textPrimary)
                     
                 )
                 .padding()
@@ -156,7 +161,7 @@ struct LoginView: View {
                     
                 }) {
                     Text("Don't have an account?")
-                        .foregroundColor(.black.opacity(0.7))
+                        .foregroundColor(Color.theme.textSecondary)
                 }
                 
                 Spacer()

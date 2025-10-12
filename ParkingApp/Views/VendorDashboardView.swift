@@ -18,7 +18,7 @@ struct VendorDashboardView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.white.ignoresSafeArea()
+                Color.theme.background.ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     // Header with navigation
@@ -72,8 +72,9 @@ struct VendorDashboardView: View {
                 Text("Vendor Dashboard")
                     .font(.largeTitle)
                     .bold()
+                    .foregroundColor(Color.theme.textPrimary)
                 Text("Manage your parking lots")
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.textSecondary)
             }
             Spacer()
             
@@ -141,10 +142,10 @@ struct VendorDashboardView: View {
                         VStack(spacing: 15) {
                             Image(systemName: "building.2.slash")
                                 .font(.system(size: 60))
-                                .foregroundColor(.gray)
+                                .foregroundColor(Color.theme.iconSecondary)
                             Text("No parking lots yet")
                                 .font(.title3)
-                                .foregroundColor(.gray)
+                                .foregroundColor(Color.theme.textSecondary)
                             Button(action: {
                                 showAddParkingLot = true
                             }) {
@@ -201,13 +202,14 @@ struct StatCard: View {
             Text(value)
                 .font(.title2)
                 .bold()
+                .foregroundColor(Color.theme.textPrimary)
             Text(title)
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(Color.white)
+        .background(Color.theme.cardBackground)
         .cornerRadius(15)
         .shadow(color: Color.black.opacity(0.1), radius: 5, y: 2)
     }
@@ -223,9 +225,10 @@ struct VendorParkingLotCard: View {
                 VStack(alignment: .leading, spacing: 5) {
                     Text(parkingLot.name)
                         .font(.headline)
+                        .foregroundColor(Color.theme.textPrimary)
                     Text(parkingLot.address)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                         .lineLimit(1)
                 }
                 Spacer()
@@ -257,7 +260,7 @@ struct VendorParkingLotCard: View {
             }
         }
         .padding()
-        .background(Color.white)
+        .background(Color.theme.cardBackground)
         .cornerRadius(15)
         .shadow(color: Color.black.opacity(0.1), radius: 5, y: 2)
     }
@@ -335,7 +338,7 @@ struct VendorEditParkingLotView: View {
                         Text("Available Spaces")
                         Spacer()
                         Text("\(parkingLot.availableSpaces)")
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.theme.textSecondary)
                     }
                 }
                 

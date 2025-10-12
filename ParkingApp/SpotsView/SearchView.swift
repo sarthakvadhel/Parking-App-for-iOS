@@ -20,13 +20,13 @@ struct SearchView: View {
                     .padding()
                     .foregroundColor(.blue)
                 Text("Search For Parking")
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.textSecondary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .padding()
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.iconSecondary)
             }
-            .background(Color.white)
+            .background(Color.theme.cardBackground)
             .cornerRadius(25)
         }
         .sheet(isPresented: $showSearch) {
@@ -57,15 +57,16 @@ struct ParkingSearchView: View {
                 // Search Bar
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.iconSecondary)
                     TextField("Search by name or address", text: $searchText)
                         .textFieldStyle(PlainTextFieldStyle())
+                        .foregroundColor(Color.theme.textPrimary)
                     if !searchText.isEmpty {
                         Button(action: {
                             searchText = ""
                         }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.gray)
+                                .foregroundColor(Color.theme.iconSecondary)
                         }
                     }
                 }
@@ -82,9 +83,9 @@ struct ParkingSearchView: View {
                     VStack(spacing: 15) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 60))
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.theme.iconSecondary)
                         Text(searchText.isEmpty ? "Start searching for parking" : "No results found")
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.theme.textSecondary)
                     }
                     .padding()
                     Spacer()
@@ -156,9 +157,10 @@ struct SearchResultRow: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(parkingItem.name)
                 .font(.headline)
+                .foregroundColor(Color.theme.textPrimary)
             Text(parkingItem.address)
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.textSecondary)
             HStack {
                 Label("\(parkingItem.carLimit) spaces", systemImage: "car.fill")
                     .font(.caption)

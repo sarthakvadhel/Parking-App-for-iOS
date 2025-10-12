@@ -27,10 +27,11 @@ struct ErrorView: View {
             Text(title)
                 .font(.title)
                 .bold()
+                .foregroundColor(Color.theme.textPrimary)
             
             Text(message)
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -48,7 +49,7 @@ struct ErrorView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        .background(Color.theme.background)
     }
 }
 
@@ -64,10 +65,10 @@ struct LoadingView: View {
             ProgressView()
                 .scaleEffect(1.5)
             Text(message)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.textSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        .background(Color.theme.background)
     }
 }
 
@@ -90,15 +91,16 @@ struct EmptyStateView: View {
         VStack(spacing: 20) {
             Image(systemName: icon)
                 .font(.system(size: 60))
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.iconSecondary)
             
             Text(title)
                 .font(.title2)
                 .bold()
+                .foregroundColor(Color.theme.textPrimary)
             
             Text(message)
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -116,5 +118,6 @@ struct EmptyStateView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.theme.background)
     }
 }

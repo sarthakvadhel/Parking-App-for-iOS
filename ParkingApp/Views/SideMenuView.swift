@@ -43,9 +43,10 @@ struct SideMenuView: View {
                 if let user = currentUser {
                     Text(user.name ?? user.email)
                         .font(.headline)
+                        .foregroundColor(Color.theme.textPrimary)
                     Text(user.email)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                 }
             }
             .padding(.top, 8)
@@ -94,7 +95,7 @@ struct SideMenuView: View {
         .padding(.top, 60)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .frame(width: 280)
-        .background(Color.white)
+        .background(Color.theme.background)
         .shadow(color: Color.black.opacity(0.15), radius: 10, x: 6, y: 0)
         .accessibilityIdentifier("SideMenuView")
         .onAppear {

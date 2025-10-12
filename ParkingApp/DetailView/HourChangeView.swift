@@ -25,7 +25,7 @@ struct HourChangeView: View {
             }
             .frame(height: 80)
             .padding(20)
-            .background(Color.white)
+            .background(Color.theme.cardBackground)
             .cornerRadius(15)
             .offset(y: -140)
         }

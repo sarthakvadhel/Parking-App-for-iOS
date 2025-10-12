@@ -17,9 +17,9 @@ struct TopNavigationView: View {
             Button(action: onMenuTap) {
                 Image(systemName: "line.3.horizontal")
                     .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(Color.theme.textPrimary)
                     .frame(width: 66, height: 66)
-                    .background(Color.white)
+                    .background(Color.theme.cardBackground)
                     .cornerRadius(25)
             }
 
@@ -31,14 +31,14 @@ struct TopNavigationView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("My car")
                         .font(.system(size: 14))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                     Text(firestoreManager.currentVehicle?.vehicleNumber ?? "GJ01AE7828")
                         .font(.system(size: 17))
-                        .foregroundColor(.black)
+                        .foregroundColor(Color.theme.textPrimary)
                 }
             }
             .frame(width: 182, height: 66)
-            .background(Color.white)
+            .background(Color.theme.cardBackground)
             .cornerRadius(25)
             .onTapGesture {
                 // Future: Show vehicle selection sheet

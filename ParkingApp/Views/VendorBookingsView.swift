@@ -60,15 +60,15 @@ struct VendorBookingsView: View {
         VStack(spacing: 16) {
             Image(systemName: iconForStatus(selectedFilter))
                 .font(.system(size: 60))
-                .foregroundColor(.gray.opacity(0.5))
+                .foregroundColor(Color.theme.iconSecondary.opacity(0.7))
             
             Text("No \(selectedFilter.rawValue.lowercased()) bookings")
                 .font(.headline)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.textSecondary)
             
             Text(messageForStatus(selectedFilter))
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
         }
@@ -129,11 +129,12 @@ struct VendorBookingCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(booking.parkingLotName ?? "Unknown Parking")
                         .font(.headline)
+                        .foregroundColor(Color.theme.textPrimary)
                     
                     // Ensure Substring is converted to String for interpolation
                     Text("Booking #\((booking.id.map { String($0.prefix(8)) }) ?? "N/A")")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                 }
                 
                 Spacer()
@@ -229,12 +230,12 @@ struct DetailRow: View {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(Color.theme.iconSecondary)
                 .frame(width: 20)
             
             Text(text)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(Color.theme.textPrimary)
         }
     }
 }

@@ -89,7 +89,7 @@ struct WelcomeView: View {
                     showWelcome = false
                 }) {
                     Text("Skip")
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.textSecondary)
                 }
             }
             .padding(.horizontal, 30)
@@ -122,7 +122,7 @@ struct OnboardingPage: View {
                 
                 Text(feature.description)
                     .font(.body)
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }

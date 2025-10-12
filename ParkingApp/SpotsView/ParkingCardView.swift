@@ -14,19 +14,22 @@ struct ParkingCardView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(parkingPlace.name)
                     .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color.theme.textPrimary)
                 Text(parkingPlace.address)
                     .font(.system(size: 14))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.theme.textSecondary)
                     .padding(.bottom, 20)
                 
                 HStack {
                     Image(systemName: "car.fill")
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.iconSecondary)
                     Text("\(parkingPlace.carLimit)")
+                        .foregroundColor(Color.theme.textPrimary)
                     
                     Image(systemName: "indianrupeesign.circle.fill")
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.theme.iconSecondary)
                     Text("₹\(String.init(format: "%0.2f", parkingPlace.fee))/h")
+                        .foregroundColor(Color.theme.textPrimary)
                 }
             }
             
@@ -40,7 +43,7 @@ struct ParkingCardView: View {
         }
         .padding()
         .frame(height: 150)
-        .background(Color.white)
+        .background(Color.theme.cardBackground)
         .cornerRadius(40)
     }
 }

@@ -45,20 +45,53 @@ extension Double {
     }
 }
 
-// Color extensions for theme support
+// Color extensions for theme support with adaptive contrast
 extension Color {
     static let theme = ThemeColors()
+    
+    // Adaptive colors based on color scheme
+    static var adaptiveBackground: Color {
+        Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.black : UIColor.white
+        })
+    }
+    
+    static var adaptiveText: Color {
+        Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.white : UIColor.black
+        })
+    }
+    
+    static var adaptiveSecondaryText: Color {
+        Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.lightGray : UIColor.darkGray
+        })
+    }
+    
+    static var adaptiveCardBackground: Color {
+        Color(UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.systemGray6 : UIColor.white
+        })
+    }
 }
 
 struct ThemeColors {
+    // Primary colors
     let primary = Color.black
-    let secondary = Color.gray
     let accent = Color.blue
     let success = Color.green
     let warning = Color.orange
     let error = Color.red
-    let background = Color.white
-    let cardBackground = Color.white
-    let textPrimary = Color.black
-    let textSecondary = Color.gray
+    
+    // Adaptive backgrounds with proper contrast
+    let background = Color.adaptiveBackground
+    let cardBackground = Color.adaptiveCardBackground
+    
+    // Adaptive text colors with guaranteed contrast
+    let textPrimary = Color.adaptiveText
+    let textSecondary = Color.adaptiveSecondaryText
+    
+    // Icon colors - adaptive
+    let iconPrimary = Color.adaptiveText
+    let iconSecondary = Color.adaptiveSecondaryText
 }

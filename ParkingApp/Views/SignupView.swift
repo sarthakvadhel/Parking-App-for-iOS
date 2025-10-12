@@ -198,7 +198,7 @@ struct SignupView: View {
                     }
                 }) {
                     Text("Already have an account?")
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color.white.opacity(0.9))
                 }
                 
                 Spacer()

@@ -35,7 +35,7 @@ struct VehicleRegistrationView: View {
                             .padding(.top)
                         
                         Text("Register your vehicle details to book parking")
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color.theme.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.bottom)
                         
@@ -104,7 +104,7 @@ struct VehicleRegistrationView: View {
                             dismiss()
                         }) {
                             Text("Skip for Now")
-                                .foregroundColor(.gray)
+                                .foregroundColor(Color.theme.textSecondary)
                         }
                         .padding(.bottom)
                     }

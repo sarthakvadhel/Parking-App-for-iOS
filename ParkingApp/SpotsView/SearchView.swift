@@ -133,7 +133,8 @@ struct ParkingSearchView: View {
                             hour: "0.0",
                             description: lot.description,
                             lateFee: lot.lateFee,
-                            terms: lot.terms
+                            terms: lot.terms,
+                            vendorId: lot.vendorId
                         )
                     }
                     isLoading = false

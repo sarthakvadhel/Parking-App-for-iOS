@@ -113,7 +113,25 @@ service firebase.storage {
 
 ### 6. Firestore Indexes
 
-The app uses simple queries, but you may need to create composite indexes if you get errors. Firebase will provide a link to create the required index when needed.
+The app requires a composite index for vendor booking queries. Create this index in Firebase Console:
+
+**Required Index:**
+- Collection: `bookings`
+- Fields:
+  - `vendorId` (Ascending)
+  - `startTime` (Descending)
+- Scope: Collection
+
+To create the index:
+1. Go to Firestore Database → Indexes
+2. Click "Create Index"
+3. Set Collection ID: `bookings`
+4. Add fields:
+   - Field path: `vendorId`, Order: Ascending
+   - Field path: `startTime`, Order: Descending
+5. Click "Create"
+
+Alternatively, Firebase will automatically provide a link to create the required index when the app attempts to use it for the first time.
 
 ### 7. Build and Run
 
@@ -182,6 +200,7 @@ The app uses simple queries, but you may need to create composite indexes if you
   "userId": "user_id",
   "vehicleId": "vehicle_id",
   "parkingLotId": "lot_id",
+  "vendorId": "vendor_user_id",
   "startTime": "timestamp",
   "endTime": "timestamp",
   "plannedHours": 2.0,

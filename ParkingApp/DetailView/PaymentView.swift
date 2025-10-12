@@ -230,6 +230,7 @@ struct PaymentOptionsView: View {
                     userId: userID,
                     vehicleId: vehicle.id ?? "",
                     parkingLotId: parkingItem.id,
+                    vendorId: parkingItem.vendorId,
                     startTime: Date(),
                     duration: selectedHour,
                     status: .active, totalAmount: amount

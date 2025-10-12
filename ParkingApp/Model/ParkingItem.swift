@@ -21,4 +21,5 @@ struct ParkingItem: Identifiable {
     var description: String?
     var lateFee: Double?
     var terms: String?
+    var vendorId: String?
 }

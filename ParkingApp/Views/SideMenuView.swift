@@ -3,9 +3,10 @@ import FirebaseAuth
 
 struct SideMenuView: View {
     @Binding var isOpen: Bool
-    @AppStorage("uid") var userID: String = ""
+    @StateObject var authManager = AuthManager.shared
     @ObservedObject var firestoreManager = FirestoreManager.shared
     @State private var currentUser: User?
+    @State private var showLogoutConfirmation = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -66,7 +67,7 @@ struct SideMenuView: View {
             }
 
             Button {
-                signOut()
+                showLogoutConfirmation = true
             } label: {
                 HStack(spacing: 14) {
                     Image(systemName: "rectangle.portrait.and.arrow.right")
@@ -78,6 +79,14 @@ struct SideMenuView: View {
                 .padding(.vertical, 6)
             }
             .padding(.top, 8)
+            .alert("Sign Out", isPresented: $showLogoutConfirmation) {
+                Button("Cancel", role: .cancel) {}
+                Button("Sign Out", role: .destructive) {
+                    signOut()
+                }
+            } message: {
+                Text("Are you sure you want to sign out?")
+            }
 
             Spacer()
         }
@@ -96,7 +105,7 @@ struct SideMenuView: View {
     private func loadUserInfo() {
         Task {
             do {
-                let user = try await FirestoreManager.shared.fetchUser(userId: userID)
+                let user = try await FirestoreManager.shared.fetchUser(userId: authManager.userID)
                 await MainActor.run {
                     currentUser = user
                 }
@@ -110,8 +119,14 @@ struct SideMenuView: View {
         let firebaseAuth = Auth.auth()
         do {
             try firebaseAuth.signOut()
+            try authManager.logout()
+            
+            // Clear analytics and crash logging data
+            AnalyticsService.shared.track(.userLoggedOut)
+            AnalyticsService.shared.setUserId(nil)
+            CrashLogger.shared.clearData()
+            
             withAnimation {
-                userID = ""
                 isOpen = false
             }
         } catch let signOutError as NSError {

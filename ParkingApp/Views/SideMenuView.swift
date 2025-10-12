@@ -120,6 +120,12 @@ struct SideMenuView: View {
         do {
             try firebaseAuth.signOut()
             try authManager.logout()
+            
+            // Clear analytics and crash logging data
+            AnalyticsService.shared.track(.userLoggedOut)
+            AnalyticsService.shared.setUserId(nil)
+            CrashLogger.shared.clearData()
+            
             withAnimation {
                 isOpen = false
             }

@@ -9,121 +9,35 @@ import SwiftUI
 import FirebaseAuth
 
 struct VendorDashboardView: View {
-    @AppStorage("uid") var userID: String = ""
+    @StateObject var authManager = AuthManager.shared
     @StateObject private var viewModel = VendorDashboardViewModel()
     @State private var showAddParkingLot = false
     @State private var showEditParkingLot: ParkingLot?
+    @State private var selectedTab = 0
     
     var body: some View {
         NavigationView {
             ZStack {
                 Color.white.ignoresSafeArea()
                 
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Header
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text("Vendor Dashboard")
-                                    .font(.largeTitle)
-                                    .bold()
-                                Text("Manage your parking lots")
-                                    .foregroundColor(.gray)
-                            }
-                            Spacer()
-                            
-                            Button(action: {
-                                logout()
-                            }) {
-                                Image(systemName: "rectangle.portrait.and.arrow.right")
-                                    .font(.title2)
-                                    .foregroundColor(.red)
-                            }
-                        }
-                        .padding()
-                        
-                        // Stats
-                        HStack(spacing: 15) {
-                            StatCard(
-                                title: "Total Lots",
-                                value: "\(viewModel.parkingLots.count)",
-                                icon: "building.2.fill",
-                                color: .blue
-                            )
-                            
-                            StatCard(
-                                title: "Total Spaces",
-                                value: "\(viewModel.totalSpaces)",
-                                icon: "square.grid.3x3.fill",
-                                color: .green
-                            )
-                            
-                            StatCard(
-                                title: "Available",
-                                value: "\(viewModel.availableSpaces)",
-                                icon: "checkmark.circle.fill",
-                                color: .orange
-                            )
-                        }
-                        .padding(.horizontal)
-                        
-                        // Parking Lots List
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Text("Your Parking Lots")
-                                    .font(.title2)
-                                    .bold()
-                                Spacer()
-                                Button(action: {
-                                    showAddParkingLot = true
-                                }) {
-                                    Image(systemName: "plus.circle.fill")
-                                        .font(.title2)
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                            .padding(.horizontal)
-                            
-                            if viewModel.isLoading {
-                                ProgressView()
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                            } else if viewModel.parkingLots.isEmpty {
-                                VStack(spacing: 15) {
-                                    Image(systemName: "building.2.slash")
-                                        .font(.system(size: 60))
-                                        .foregroundColor(.gray)
-                                    Text("No parking lots yet")
-                                        .font(.title3)
-                                        .foregroundColor(.gray)
-                                    Button(action: {
-                                        showAddParkingLot = true
-                                    }) {
-                                        Text("Add Your First Parking Lot")
-                                            .foregroundColor(.white)
-                                            .padding()
-                                            .background(Color.blue)
-                                            .cornerRadius(10)
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 40)
-                            } else {
-                                ForEach(viewModel.parkingLots) { lot in
-                                    VendorParkingLotCard(
-                                        parkingLot: lot,
-                                        onEdit: {
-                                            showEditParkingLot = lot
-                                        }
-                                    )
-                                }
-                                .padding(.horizontal)
-                            }
-                        }
+                VStack(spacing: 0) {
+                    // Header with navigation
+                    dashboardHeader
+                    
+                    // Tab selector
+                    Picker("Section", selection: $selectedTab) {
+                        Text("Dashboard").tag(0)
+                        Text("Bookings").tag(1)
                     }
-                }
-                .refreshable {
-                    await viewModel.loadParkingLots()
+                    .pickerStyle(.segmented)
+                    .padding()
+                    
+                    // Content based on selected tab
+                    if selectedTab == 0 {
+                        dashboardContent
+                    } else {
+                        VendorBookingsView()
+                    }
                 }
             }
             .navigationBarHidden(true)
@@ -132,6 +46,7 @@ struct VendorDashboardView: View {
             Task {
                 await viewModel.loadParkingLots()
             }
+            AnalyticsService.shared.trackScreen("VendorDashboard")
         }
         .sheet(isPresented: $showAddParkingLot) {
             VendorRegistrationView()
@@ -151,11 +66,121 @@ struct VendorDashboardView: View {
         }
     }
     
+    private var dashboardHeader: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text("Vendor Dashboard")
+                    .font(.largeTitle)
+                    .bold()
+                Text("Manage your parking lots")
+                    .foregroundColor(.gray)
+            }
+            Spacer()
+            
+            Button(action: {
+                logout()
+            }) {
+                Image(systemName: "rectangle.portrait.and.arrow.right")
+                    .font(.title2)
+                    .foregroundColor(.red)
+            }
+        }
+        .padding()
+    }
+    
+    private var dashboardContent: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // Stats
+                HStack(spacing: 15) {
+                    StatCard(
+                        title: "Total Lots",
+                        value: "\(viewModel.parkingLots.count)",
+                        icon: "building.2.fill",
+                        color: .blue
+                    )
+                    
+                    StatCard(
+                        title: "Total Spaces",
+                        value: "\(viewModel.totalSpaces)",
+                        icon: "square.grid.3x3.fill",
+                        color: .green
+                    )
+                    
+                    StatCard(
+                        title: "Available",
+                        value: "\(viewModel.availableSpaces)",
+                        icon: "checkmark.circle.fill",
+                        color: .orange
+                    )
+                }
+                .padding(.horizontal)
+                
+                // Parking Lots List
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("Your Parking Lots")
+                            .font(.title2)
+                            .bold()
+                        Spacer()
+                        Button(action: {
+                            showAddParkingLot = true
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else if viewModel.parkingLots.isEmpty {
+                        VStack(spacing: 15) {
+                            Image(systemName: "building.2.slash")
+                                .font(.system(size: 60))
+                                .foregroundColor(.gray)
+                            Text("No parking lots yet")
+                                .font(.title3)
+                                .foregroundColor(.gray)
+                            Button(action: {
+                                showAddParkingLot = true
+                            }) {
+                                Text("Add Your First Parking Lot")
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .cornerRadius(10)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 40)
+                    } else {
+                        ForEach(viewModel.parkingLots) { lot in
+                            VendorParkingLotCard(
+                                parkingLot: lot,
+                                onEdit: {
+                                    showEditParkingLot = lot
+                                }
+                            )
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+            }
+        }
+        .refreshable {
+            await viewModel.loadParkingLots()
+        }
+    }
+    
     private func logout() {
         let firebaseAuth = Auth.auth()
         do {
             try firebaseAuth.signOut()
-            userID = ""
+            try authManager.logout()
         } catch let signOutError as NSError {
             print("Error signing out: %@", signOutError)
         }

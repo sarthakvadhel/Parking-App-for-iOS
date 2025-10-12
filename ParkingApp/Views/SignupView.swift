@@ -68,6 +68,12 @@ struct SignupView: View {
                         await MainActor.run {
                             do {
                                 try authManager.login(uid: authResult.user.uid, role: selectedRole)
+                                
+                                // Track analytics
+                                AnalyticsService.shared.setUserId(authResult.user.uid)
+                                AnalyticsService.shared.track(.userSignedUp(role: selectedRole.rawValue))
+                                CrashLogger.shared.setUserIdentifier(authResult.user.uid)
+                                
                                 showSuccess = true
                                 
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

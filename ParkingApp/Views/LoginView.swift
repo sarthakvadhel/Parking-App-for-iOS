@@ -59,6 +59,12 @@ struct LoginView: View {
                         await MainActor.run {
                             do {
                                 try authManager.login(uid: authResult.user.uid, role: user.role)
+                                
+                                // Track analytics
+                                AnalyticsService.shared.setUserId(authResult.user.uid)
+                                AnalyticsService.shared.track(.userLoggedIn(role: user.role.rawValue))
+                                CrashLogger.shared.setUserIdentifier(authResult.user.uid)
+                                
                             } catch {
                                 errorMessage = "Failed to save login credentials"
                                 showError = true

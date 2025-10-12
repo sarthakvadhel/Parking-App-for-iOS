@@ -34,6 +34,7 @@ struct TopNavigationView: View {
                         .foregroundColor(.gray)
                     Text(firestoreManager.currentVehicle?.vehicleNumber ?? "GJ01AE7828")
                         .font(.system(size: 17))
+                        .foregroundColor(.black)
                 }
             }
             .frame(width: 182, height: 66)

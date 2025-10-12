@@ -56,7 +56,7 @@ struct ParkingDetailView: View {
                         SpotAnnotatonView(fee: "", selected: true)
                     }
                 }
-                .frame(height: 240)
+                .frame(height: 170)
                 .cornerRadius(45)
                 .padding(.top, 10)
                 

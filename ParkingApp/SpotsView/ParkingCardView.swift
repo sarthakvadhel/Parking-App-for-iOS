@@ -24,7 +24,7 @@ struct ParkingCardView: View {
                         .foregroundColor(.gray)
                     Text("\(parkingPlace.carLimit)")
                     
-                    Image(systemName: "dollarsign.circle.fill")
+                    Image(systemName: "indianrupeesign.circle.fill")
                         .foregroundColor(.gray)
                     Text("₹\(String.init(format: "%0.2f", parkingPlace.fee))/h")
                 }

@@ -49,8 +49,13 @@ Collections:
 - `users` - User profiles and roles
 - `vehicles` - User vehicle registrations
 - `parkingLots` - Vendor parking lot information
-- `bookings` - Parking bookings
+- `bookings` - Parking bookings (requires vendorId field)
 - `payments` - Payment records
+
+**Required Composite Index:**
+- Collection: `bookings`
+- Fields: `vendorId` (Ascending), `startTime` (Descending)
+- This index enables vendors to view their bookings sorted by time
 
 ### Cloud Storage (Optional)
 - User profile pictures

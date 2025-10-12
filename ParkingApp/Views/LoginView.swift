@@ -10,8 +10,7 @@ import FirebaseAuth
 
 struct LoginView: View {
     @Binding var currentShowingView: String
-    @AppStorage("uid") var userID: String = ""
-    @AppStorage("userRole") var userRole: String = ""
+    @StateObject var authManager = AuthManager.shared
     
     @State private var email: String = ""
     @State private var password: String = ""
@@ -58,8 +57,13 @@ struct LoginView: View {
                     do {
                         let user = try await FirestoreManager.shared.fetchUser(userId: authResult.user.uid)
                         await MainActor.run {
-                            userID = authResult.user.uid
-                            userRole = user.role.rawValue
+                            do {
+                                try authManager.login(uid: authResult.user.uid, role: user.role)
+                            } catch {
+                                errorMessage = "Failed to save login credentials"
+                                showError = true
+                                try? Auth.auth().signOut()
+                            }
                         }
                     } catch {
                         await MainActor.run {

@@ -25,12 +25,18 @@ class ParkingFinder: NSObject, ObservableObject {
     
     override init() {
         super.init()
+        
+        // Initialize with static data immediately to prevent crashes
+        self.spots = Data.spots
+        self.selectedPlace = Data.spots.first
+        
+        // Setup location manager
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
         
-        // Load parking lots from Firestore
+        // Load parking lots from Firestore (async)
         loadParkingLots()
     }
     

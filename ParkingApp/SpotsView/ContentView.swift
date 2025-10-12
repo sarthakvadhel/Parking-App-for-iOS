@@ -10,8 +10,7 @@ import MapKit
 
 struct ContentView: View {
     
-    @AppStorage("uid") var userID: String = ""
-    @AppStorage("userRole") var userRole: String = ""
+    @StateObject var authManager = AuthManager.shared
     @AppStorage("hasSeenWelcome") var hasSeenWelcome: Bool = false
     @StateObject var parkingFinder = ParkingFinder()
     
@@ -26,14 +25,14 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            if !hasSeenWelcome && userID == "" {
+            if !hasSeenWelcome && authManager.userID == "" {
                 WelcomeView(showWelcome: $showWelcome)
                     .onDisappear {
                         hasSeenWelcome = true
                     }
-            } else if userID == "" {
+            } else if authManager.userID == "" {
                 AuthView()
-            } else if userRole == UserRole.vendor.rawValue {
+            } else if authManager.userRole == .vendor {
                 // Vendor flow
                 if !hasCheckedRegistration {
                     ProgressView("Loading...")
@@ -68,16 +67,18 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            if !hasSeenWelcome && userID == "" {
+            if !hasSeenWelcome && authManager.userID == "" {
                 showWelcome = true
             }
+            // Migrate data from UserDefaults to Keychain on first launch
+            authManager.migrateFromUserDefaults()
         }
     }
     
     private func checkUserRegistration() {
         Task {
             do {
-                let vehicles = try await FirestoreManager.shared.fetchVehicles(userId: userID)
+                let vehicles = try await FirestoreManager.shared.fetchVehicles(userId: authManager.userID)
                 await MainActor.run {
                     hasCheckedRegistration = true
                     if vehicles.isEmpty {
@@ -101,7 +102,7 @@ struct ContentView: View {
     private func checkVendorRegistration() {
         Task {
             do {
-                let parkingLots = try await FirestoreManager.shared.fetchVendorParkingLots(vendorId: userID)
+                let parkingLots = try await FirestoreManager.shared.fetchVendorParkingLots(vendorId: authManager.userID)
                 await MainActor.run {
                     hasCheckedRegistration = true
                     if parkingLots.isEmpty {
@@ -151,6 +152,42 @@ struct ContentView: View {
             // background
             Color.white.ignoresSafeArea()
             
+            // Show loading state or content
+            if parkingFinder.isLoading && parkingFinder.spots.isEmpty {
+                VStack {
+                    Spacer()
+                    ProgressView("Loading parking spots...")
+                        .padding()
+                    Spacer()
+                }
+            } else if parkingFinder.spots.isEmpty {
+                VStack {
+                    Spacer()
+                    Text("No parking spots available")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                    Text("Please check back later")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding(.top, 4)
+                    Spacer()
+                }
+            } else {
+                // Map and UI content - only shown when spots are available
+                mapAndUIContent
+            }
+        }
+        .onAppear {
+            // Safe initialization of selected place
+            if parkingFinder.selectedPlace == nil, let firstSpot = parkingFinder.spots.first {
+                parkingFinder.selectedPlace = firstSpot
+            }
+        }
+    }
+    
+    // Separate map and UI content to avoid code duplication
+    private var mapAndUIContent: some View {
+        ZStack(alignment: .top) {
             // map view
             Map(
                 coordinateRegion: $parkingFinder.region,
@@ -184,12 +221,14 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                // parking card view
-                ParkingCardView(parkingPlace: parkingFinder.selectedPlace ?? parkingFinder.spots[0])
-                    .offset(y: -30)
-                    .onTapGesture {
-                        parkingFinder.showDetail = true
-                    }
+                // parking card view - safe access with nil coalescing
+                if let displayPlace = parkingFinder.selectedPlace ?? parkingFinder.spots.first {
+                    ParkingCardView(parkingPlace: displayPlace)
+                        .offset(y: -30)
+                        .onTapGesture {
+                            parkingFinder.showDetail = true
+                        }
+                }
                 
                 // search view
                 SearchView()
@@ -198,17 +237,16 @@ struct ContentView: View {
             
             if parkingFinder.showDetail {
                 // parking detail view when click on card
-                ParkingDetailView(
-                    parkingFinder: parkingFinder,
-                    region: MKCoordinateRegion(
-                        center: parkingFinder.selectedPlace?.location ?? parkingFinder.spots[0].location,
-                        span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
+                if let selectedPlace = parkingFinder.selectedPlace ?? parkingFinder.spots.first {
+                    ParkingDetailView(
+                        parkingFinder: parkingFinder,
+                        region: MKCoordinateRegion(
+                            center: selectedPlace.location,
+                            span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
+                        )
                     )
-                )
+                }
             }
-        }
-        .onAppear {
-            parkingFinder.selectedPlace = parkingFinder.spots[0]
         }
     }
 }

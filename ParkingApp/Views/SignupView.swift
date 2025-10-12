@@ -18,8 +18,7 @@ struct SignupView: View {
     @State private var showSuccess = false
     @State private var isLoading = false
     
-    @AppStorage("uid") var userID: String = ""
-    @AppStorage("userRole") var userRole: String = ""
+    @StateObject var authManager = AuthManager.shared
     @Binding var currentShowingView: String
     
     private func isValidPassword(_ password: String) -> Bool {
@@ -67,12 +66,17 @@ struct SignupView: View {
                     do {
                         try await FirestoreManager.shared.createUser(newUser)
                         await MainActor.run {
-                            userID = authResult.user.uid
-                            userRole = selectedRole.rawValue
-                            showSuccess = true
-                            
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                showSuccess = false
+                            do {
+                                try authManager.login(uid: authResult.user.uid, role: selectedRole)
+                                showSuccess = true
+                                
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                    showSuccess = false
+                                }
+                            } catch {
+                                errorMessage = "Failed to save login credentials"
+                                showError = true
+                                try? Auth.auth().signOut()
                             }
                         }
                     } catch {

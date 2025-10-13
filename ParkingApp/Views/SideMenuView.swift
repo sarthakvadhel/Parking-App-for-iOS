@@ -8,6 +8,7 @@ struct SideMenuView: View {
     @State private var currentUser: User?
     @State private var showLogoutConfirmation = false
     @State private var showMyVehicles = false
+    @State private var showSettings = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -66,7 +67,7 @@ struct SideMenuView: View {
                 showMyVehicles = true
             }
             ButtonRow(title: "Settings", systemImage: "gearshape") {
-                // Future: Navigate to settings
+                showSettings = true
             }
 
             Button {
@@ -103,6 +104,9 @@ struct SideMenuView: View {
         .offset(CGSize(width: -10.0, height: 0.0))
         .sheet(isPresented: $showMyVehicles) {
             MyVehiclesView()
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
         .onAppear {
             loadUserInfo()

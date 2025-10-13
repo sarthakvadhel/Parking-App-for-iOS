@@ -25,6 +25,8 @@ enum AnalyticsEvent {
     case paymentCompleted(amount: Double, method: String)
     case paymentFailed(reason: String)
     case errorOccurred(screen: String, error: String)
+    case passwordChanged
+    case userDeleted
     
     var name: String {
         switch self {
@@ -41,6 +43,8 @@ enum AnalyticsEvent {
         case .paymentCompleted: return "payment_completed"
         case .paymentFailed: return "payment_failed"
         case .errorOccurred: return "error_occurred"
+        case .passwordChanged: return "password_changed"
+        case .userDeleted: return "user_deleted"
         }
     }
     
@@ -100,6 +104,12 @@ enum AnalyticsEvent {
                 "screen": screen,
                 "error": error
             ]
+            
+        case .passwordChanged:
+            return ["timestamp": Date().timeIntervalSince1970]
+            
+        case .userDeleted:
+            return ["timestamp": Date().timeIntervalSince1970]
         }
     }
 }

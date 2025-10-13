@@ -10,21 +10,35 @@ struct SideMenuView: View {
     @State private var showMyVehicles = false
     @State private var showMyBookings = false
     @State private var showSettings = false
+    @State private var showMyProfile = false
+    @State private var profileImage: UIImage?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             // Header with user info
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    // Profile image placeholder
-                    Circle()
-                        .fill(Color.blue.opacity(0.2))
-                        .frame(width: 50, height: 50)
-                        .overlay(
-                            Text(currentUser?.email.prefix(1).uppercased() ?? "U")
-                                .font(.title2)
-                                .foregroundColor(.blue)
-                        )
+                    // Profile image
+                    ZStack {
+                        if let image = profileImage {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 60, height: 60)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        } else {
+                            Circle()
+                                .fill(Color.blue.opacity(0.2))
+                                .frame(width: 60, height: 60)
+                                .overlay(
+                                    Text(currentUser?.name?.prefix(1).uppercased() ?? currentUser?.email.prefix(1).uppercased() ?? "U")
+                                        .font(.title2)
+                                        .foregroundColor(.blue)
+                                )
+                                .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        }
+                    }
                     
                     Spacer()
                     
@@ -58,7 +72,7 @@ struct SideMenuView: View {
 
             // Menu items
             ButtonRow(title: "My Profile", systemImage: "person") {
-                // Future: Navigate to profile
+                showMyProfile = true
             }
             .foregroundColor(.white)
             ButtonRow(title: "My Bookings", systemImage: "clock") {
@@ -112,6 +126,12 @@ struct SideMenuView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
+        .sheet(isPresented: $showMyProfile) {
+            MyProfileView()
+                .onDisappear {
+                    loadUserInfo()
+                }
+        }
         .onAppear {
             loadUserInfo()
         }
@@ -121,6 +141,17 @@ struct SideMenuView: View {
         Task {
             do {
                 let user = try await FirestoreManager.shared.fetchUser(userId: authManager.userID)
+                
+                // Load profile image if URL exists
+                if let imageURL = user.profileImageURL, let url = URL(string: imageURL) {
+                    let (data, _) = try await URLSession.shared.data(from: url)
+                    if let image = UIImage(data: data) {
+                        await MainActor.run {
+                            profileImage = image
+                        }
+                    }
+                }
+                
                 await MainActor.run {
                     currentUser = user
                 }

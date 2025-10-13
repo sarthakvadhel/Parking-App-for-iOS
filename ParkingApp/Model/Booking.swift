@@ -34,6 +34,9 @@ struct Booking: Codable, Identifiable {
     var acceptedAt: Date?
     var cancelledAt: Date?
     var cancellationReason: String?
+    var completedAt: Date?
+    var lateFeeAmount: Double?
+    var paymentConfirmedAt: Date?
     var createdAt: Date
     
     init(
@@ -55,6 +58,9 @@ struct Booking: Codable, Identifiable {
         acceptedAt: Date? = nil,
         cancelledAt: Date? = nil,
         cancellationReason: String? = nil,
+        completedAt: Date? = nil,
+        lateFeeAmount: Double? = nil,
+        paymentConfirmedAt: Date? = nil,
         createdAt: Date = Date()
     ) {
         self.id = id
@@ -75,6 +81,9 @@ struct Booking: Codable, Identifiable {
         self.acceptedAt = acceptedAt
         self.cancelledAt = cancelledAt
         self.cancellationReason = cancellationReason
+        self.completedAt = completedAt
+        self.lateFeeAmount = lateFeeAmount
+        self.paymentConfirmedAt = paymentConfirmedAt
         self.createdAt = createdAt
     }
 }

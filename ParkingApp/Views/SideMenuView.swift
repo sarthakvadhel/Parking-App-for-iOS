@@ -8,6 +8,7 @@ struct SideMenuView: View {
     @State private var currentUser: User?
     @State private var showLogoutConfirmation = false
     @State private var showMyVehicles = false
+    @State private var showMyBookings = false
     @State private var showSettings = false
 
     var body: some View {
@@ -61,7 +62,7 @@ struct SideMenuView: View {
             }
             .foregroundColor(.white)
             ButtonRow(title: "My Bookings", systemImage: "clock") {
-                // Future: Navigate to bookings
+                showMyBookings = true
             }
             ButtonRow(title: "My Vehicles", systemImage: "car.fill") {
                 showMyVehicles = true
@@ -102,6 +103,9 @@ struct SideMenuView: View {
         .shadow(color: Color.black.opacity(0.15), radius: 10, x: 6, y: 0)
         .accessibilityIdentifier("SideMenuView")
         .offset(CGSize(width: -10.0, height: 0.0))
+        .sheet(isPresented: $showMyBookings) {
+            UserBookingsView()
+        }
         .sheet(isPresented: $showMyVehicles) {
             MyVehiclesView()
         }

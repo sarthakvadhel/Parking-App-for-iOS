@@ -209,6 +209,36 @@ class FirestoreManager: ObservableObject {
         }
     }
     
+    func completeBooking(
+        bookingId: String,
+        actualHours: Double,
+        hourlyRate: Double,
+        lateFeeRate: Double?
+    ) async throws {
+        let bookingRef = db.collection("bookings").document(bookingId)
+        let document = try await bookingRef.getDocument()
+        
+        guard var booking = try? document.data(as: Booking.self) else {
+            throw NSError(domain: "FirestoreManager", code: 7, userInfo: [NSLocalizedDescriptionKey: "Booking not found"])
+        }
+        
+        // Calculate late fee if applicable
+        var lateFee: Double = 0
+        if actualHours > booking.duration {
+            let extraHours = actualHours - booking.duration
+            lateFee = extraHours * (lateFeeRate ?? hourlyRate)
+        }
+        
+        // Update booking fields
+        booking.status = .completed
+        booking.actualHours = actualHours
+        booking.completedAt = Date()
+        booking.lateFeeAmount = lateFee
+        booking.paymentConfirmedAt = Date()
+        
+        try await updateBooking(booking)
+    }
+    
     // MARK: - Payment Operations
     
     func createPayment(_ payment: Payment) async throws -> String {

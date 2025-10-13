@@ -30,13 +30,14 @@ struct VendorRegistrationView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.white.ignoresSafeArea()
+                Color.theme.background.ignoresSafeArea()
                 
                 ScrollView {
                     VStack(spacing: 20) {
                         Text("Register Parking Lot")
                             .font(.largeTitle)
                             .bold()
+                            .foregroundColor(Color.theme.textPrimary)
                             .padding(.top)
                         
                         Text("Provide details about your parking space")
@@ -48,6 +49,7 @@ struct VendorRegistrationView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Parking Lot Name")
                                 .font(.headline)
+                                .foregroundColor(Color.theme.textPrimary)
                             TextField("e.g., City Center Parking", text: $name)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
@@ -57,6 +59,7 @@ struct VendorRegistrationView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Description")
                                 .font(.headline)
+                                .foregroundColor(Color.theme.textPrimary)
                             TextEditor(text: $description)
                                 .frame(height: 80)
                                 .overlay(
@@ -70,6 +73,7 @@ struct VendorRegistrationView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Address")
                                 .font(.headline)
+                                .foregroundColor(Color.theme.textPrimary)
                             TextField("Full address", text: $address)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
@@ -97,6 +101,7 @@ struct VendorRegistrationView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Hourly Charge (₹)")
                                 .font(.headline)
+                                .foregroundColor(Color.theme.textPrimary)
                             TextField("e.g., 50", text: $hourlyCharge)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.decimalPad)
@@ -107,6 +112,7 @@ struct VendorRegistrationView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Late Fee per Hour (₹)")
                                 .font(.headline)
+                                .foregroundColor(Color.theme.textPrimary)
                             TextField("e.g., 20", text: $lateFee)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.decimalPad)
@@ -117,6 +123,7 @@ struct VendorRegistrationView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Total Parking Spaces")
                                 .font(.headline)
+                                .foregroundColor(Color.theme.textPrimary)
                             TextField("e.g., 50", text: $totalSpaces)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.numberPad)
@@ -127,6 +134,7 @@ struct VendorRegistrationView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Terms & Conditions")
                                 .font(.headline)
+                                .foregroundColor(Color.theme.textPrimary)
                             TextEditor(text: $terms)
                                 .frame(height: 100)
                                 .overlay(
@@ -247,9 +255,10 @@ struct VendorRegistrationView: View {
 struct MapLocationPickerView: View {
     @Environment(\.dismiss) var dismiss
     @Binding var selectedLocation: CLLocationCoordinate2D?
+    @StateObject private var locationManager = LocationManagerForVendor()
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
     )
     @State private var pinLocation: CLLocationCoordinate2D?
     
@@ -257,31 +266,75 @@ struct MapLocationPickerView: View {
         NavigationView {
             ZStack {
                 Map(coordinateRegion: $region, annotationItems: pinLocation.map { [MapPin(coordinate: $0)] } ?? []) { pin in
-                    MapMarker(coordinate: pin.coordinate, tint: .red)
+                    MapAnnotation(coordinate: pin.coordinate) {
+                        VStack(spacing: 0) {
+                            Image(systemName: "mappin.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundColor(.red)
+                            Image(systemName: "arrowtriangle.down.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(.red)
+                                .offset(y: -5)
+                        }
+                    }
                 }
-                .onTapGesture {
-                    // This doesn't work well with Map in SwiftUI, but we'll use a button to set location
+                .edgesIgnoringSafeArea(.all)
+                
+                // Center crosshair when no pin is placed
+                if pinLocation == nil {
+                    VStack {
+                        Spacer()
+                        Image(systemName: "plus")
+                            .font(.system(size: 30, weight: .thin))
+                            .foregroundColor(.red)
+                        Spacer()
+                    }
                 }
                 
                 VStack {
+                    // Instructions at top
+                    VStack(spacing: 10) {
+                        Text(pinLocation == nil ? "Move map to position" : "Drag pin to adjust position")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .background(Color.black.opacity(0.75))
+                            .cornerRadius(10)
+                            .shadow(radius: 3)
+                    }
+                    .padding(.top, 10)
+                    
                     Spacer()
                     
+                    // Action buttons at bottom
                     VStack(spacing: 15) {
-                        Text("Tap 'Drop Pin' to mark your parking location")
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.black.opacity(0.7))
-                            .cornerRadius(10)
+                        if let currentLocation = locationManager.currentLocation {
+                            Button(action: {
+                                region.center = currentLocation
+                            }) {
+                                HStack {
+                                    Image(systemName: "location.fill")
+                                    Text("Go to Current Location")
+                                }
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(10)
+                                .shadow(radius: 3)
+                            }
+                        }
                         
                         HStack(spacing: 15) {
                             Button(action: {
                                 pinLocation = region.center
                             }) {
-                                Text("Drop Pin Here")
+                                Text(pinLocation == nil ? "Drop Pin Here" : "Move Pin Here")
                                     .foregroundColor(.white)
                                     .padding()
                                     .background(Color.blue)
                                     .cornerRadius(10)
+                                    .shadow(radius: 3)
                             }
                             
                             if pinLocation != nil {
@@ -294,10 +347,15 @@ struct MapLocationPickerView: View {
                                         .padding()
                                         .background(Color.green)
                                         .cornerRadius(10)
+                                        .shadow(radius: 3)
                                 }
                             }
                         }
                     }
+                    .padding()
+                    .background(Color.white.opacity(0.95))
+                    .cornerRadius(15)
+                    .shadow(radius: 5)
                     .padding()
                 }
             }
@@ -310,6 +368,18 @@ struct MapLocationPickerView: View {
                     }
                 }
             }
+            .onAppear {
+                locationManager.requestLocation()
+                // Set initial region to user location if available
+                if let userLocation = locationManager.currentLocation {
+                    region.center = userLocation
+                }
+            }
+            .onChange(of: locationManager.currentLocation) { newLocation in
+                if let location = newLocation, pinLocation == nil {
+                    region.center = location
+                }
+            }
         }
     }
 }
@@ -317,4 +387,41 @@ struct MapLocationPickerView: View {
 struct MapPin: Identifiable {
     let id = UUID()
     let coordinate: CLLocationCoordinate2D
+}
+
+// Location manager for vendor registration
+class LocationManagerForVendor: NSObject, ObservableObject, CLLocationManagerDelegate {
+    private let locationManager = CLLocationManager()
+    @Published var currentLocation: CLLocationCoordinate2D?
+    @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
+    
+    override init() {
+        super.init()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+    }
+    
+    func requestLocation() {
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        DispatchQueue.main.async {
+            self.currentLocation = location.coordinate
+        }
+        locationManager.stopUpdatingLocation()
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        authorizationStatus = manager.authorizationStatus
+        if authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways {
+            locationManager.startUpdatingLocation()
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location error: \(error.localizedDescription)")
+    }
 }

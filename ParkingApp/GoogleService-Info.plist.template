@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyAsmVN-uPgZG6jDzpXqEFMLU5GLPnt5z6s</string>
+	<key>GCM_SENDER_ID</key>
+	<string>333378293334</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.sarthakvadhel.ParkingApp</string>
+	<key>PROJECT_ID</key>
+	<string>parkingfriendbysarthak</string>
+	<key>STORAGE_BUCKET</key>
+	<string>parkingfriendbysarthak.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:333378293334:ios:652bc7b648a8b3d58df5f7</string>
+	<key>DATABASE_URL</key>
+	<string>https://parkingfriendbysarthak-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

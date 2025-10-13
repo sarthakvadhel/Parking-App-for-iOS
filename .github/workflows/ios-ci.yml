@@ -1,0 +1,133 @@
+name: iOS CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  XCODE_VERSION: '15.0'
+  IOS_SIMULATOR: 'iPhone 15 Pro'
+  IOS_VERSION: '17.0'
+
+jobs:
+  build-and-test:
+    runs-on: macos-14
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+      
+      - name: Cache Swift Package Manager
+        uses: actions/cache@v3
+        with:
+          path: .build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+      
+      - name: Cache DerivedData
+        uses: actions/cache@v3
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-derived-data-
+      
+      - name: Install dependencies
+        run: |
+          # Add any CocoaPods or Swift Package Manager setup here if needed
+          echo "Dependencies installed"
+      
+      - name: Build for testing
+        run: |
+          xcodebuild clean build-for-testing \
+            -project ParkingApp.xcodeproj \
+            -scheme ParkingApp \
+            -destination "platform=iOS Simulator,name=${{ env.IOS_SIMULATOR }},OS=${{ env.IOS_VERSION }}" \
+            -derivedDataPath DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty
+      
+      # Uncomment when tests are available
+      # - name: Run Unit Tests
+      #   run: |
+      #     xcodebuild test-without-building \
+      #       -project ParkingApp.xcodeproj \
+      #       -scheme ParkingApp \
+      #       -destination "platform=iOS Simulator,name=${{ env.IOS_SIMULATOR }},OS=${{ env.IOS_VERSION }}" \
+      #       -derivedDataPath DerivedData \
+      #       -resultBundlePath TestResults.xcresult \
+      #       -enableCodeCoverage YES \
+      #       CODE_SIGNING_ALLOWED=NO \
+      #       | xcpretty
+      
+      # - name: Generate Coverage Report
+      #   if: success()
+      #   run: |
+      #     xcrun xccov view --report --json TestResults.xcresult > coverage.json
+      
+      # - name: Upload Coverage to Codecov
+      #   if: success()
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     files: ./coverage.json
+      #     flags: unittests
+      #     name: codecov-umbrella
+      
+      # - name: Upload Test Results
+      #   if: always()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: test-results
+      #     path: TestResults.xcresult
+  
+  lint:
+    runs-on: macos-14
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+      
+      # Uncomment when SwiftLint is configured
+      # - name: Install SwiftLint
+      #   run: brew install swiftlint
+      
+      # - name: Run SwiftLint
+      #   run: swiftlint lint --reporter github-actions-logging
+  
+  security-scan:
+    runs-on: macos-14
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check for sensitive files
+        run: |
+          # Check if GoogleService-Info.plist is committed (should not be)
+          if [ -f "ParkingApp/GoogleService-Info.plist" ]; then
+            echo "::error::GoogleService-Info.plist should not be committed to repository"
+            exit 1
+          fi
+          
+          # Check for other sensitive patterns
+          if grep -r "API_KEY\|SECRET\|PASSWORD" --include="*.swift" --include="*.plist" .; then
+            echo "::warning::Potential sensitive data found in code"
+          fi
+      
+      - name: Check dependencies for vulnerabilities
+        run: |
+          echo "Checking for known vulnerabilities in dependencies..."
+          # Add security scanning tool here (e.g., Snyk, OWASP Dependency Check)

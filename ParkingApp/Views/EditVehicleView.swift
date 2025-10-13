@@ -1,18 +1,17 @@
 //
-//  VehicleRegistrationView.swift
+//  EditVehicleView.swift
 //  ParkingApp
 //
 //  Created by Parking App Team
 //
 
 import SwiftUI
-import FirebaseAuth
 
-struct VehicleRegistrationView: View {
+struct EditVehicleView: View {
     @Environment(\.dismiss) var dismiss
     @AppStorage("uid") var userID: String = ""
     
-    var isOptional: Bool = true  // Can be skipped by default
+    let vehicle: Vehicle
     
     @State private var vehicleNumber = ""
     @State private var model = ""
@@ -22,7 +21,6 @@ struct VehicleRegistrationView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var showSuccess = false
-    @State private var shouldDismiss = false
     
     var body: some View {
         NavigationView {
@@ -31,13 +29,13 @@ struct VehicleRegistrationView: View {
                 
                 ScrollView {
                     VStack(spacing: 20) {
-                        Text("Add Your Vehicle")
+                        Text("Edit Vehicle")
                             .font(.largeTitle)
                             .bold()
                             .foregroundColor(Color.theme.textPrimary)
                             .padding(.top)
                         
-                        Text("Register your vehicle details to book parking")
+                        Text("Update your vehicle details")
                             .foregroundColor(Color.theme.textSecondary)
                             .multilineTextAlignment(.center)
                             .padding(.bottom)
@@ -85,14 +83,14 @@ struct VehicleRegistrationView: View {
                         
                         Spacer()
                         
-                        Button(action: saveVehicle) {
+                        Button(action: updateVehicle) {
                             if isLoading {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                     .frame(maxWidth: .infinity)
                                     .padding()
                             } else {
-                                Text("Save Vehicle")
+                                Text("Update Vehicle")
                                     .foregroundColor(.white)
                                     .font(.title3)
                                     .bold()
@@ -107,18 +105,17 @@ struct VehicleRegistrationView: View {
                         .padding(.horizontal)
                         .disabled(isLoading || vehicleNumber.isEmpty || model.isEmpty)
                         
-                        if isOptional {
-                            Button(action: {
-                                dismiss()
-                            }) {
-                                Text("Skip for Now")
-                                    .foregroundColor(Color.theme.textSecondary)
-                            }
-                            .padding(.bottom)
+                        Button(action: {
+                            dismiss()
+                        }) {
+                            Text("Cancel")
+                                .foregroundColor(Color.theme.textSecondary)
                         }
+                        .padding(.bottom)
                     }
                 }
             }
+            .navigationBarHidden(true)
         }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) {}
@@ -127,16 +124,21 @@ struct VehicleRegistrationView: View {
         }
         .alert("Success!", isPresented: $showSuccess) {
             Button("OK", role: .cancel) {
-                if shouldDismiss {
-                    dismiss()
-                }
+                dismiss()
             }
         } message: {
-            Text("Vehicle registered successfully!")
+            Text("Vehicle updated successfully!")
+        }
+        .onAppear {
+            // Pre-populate fields with existing vehicle data
+            vehicleNumber = vehicle.vehicleNumber
+            model = vehicle.model
+            manufacturer = vehicle.manufacturer ?? ""
+            color = vehicle.color ?? ""
         }
     }
     
-    private func saveVehicle() {
+    private func updateVehicle() {
         guard !vehicleNumber.isEmpty, !model.isEmpty else {
             errorMessage = "Please fill in required fields"
             showError = true
@@ -145,27 +147,23 @@ struct VehicleRegistrationView: View {
         
         isLoading = true
         
-        let vehicle = Vehicle(
-            userId: userID,
-            vehicleNumber: vehicleNumber.uppercased(),
-            model: model,
-            manufacturer: manufacturer.isEmpty ? nil : manufacturer,
-            color: color.isEmpty ? nil : color,
-            isActive: true
-        )
+        var updatedVehicle = vehicle
+        updatedVehicle.vehicleNumber = vehicleNumber.uppercased()
+        updatedVehicle.model = model
+        updatedVehicle.manufacturer = manufacturer.isEmpty ? nil : manufacturer
+        updatedVehicle.color = color.isEmpty ? nil : color
         
         Task {
             do {
-                _ = try await FirestoreManager.shared.createVehicle(vehicle)
+                try await FirestoreManager.shared.updateVehicle(updatedVehicle)
                 await MainActor.run {
                     isLoading = false
                     showSuccess = true
-                    shouldDismiss = true
                 }
             } catch {
                 await MainActor.run {
                     isLoading = false
-                    errorMessage = "Failed to save vehicle: \(error.localizedDescription)"
+                    errorMessage = "Failed to update vehicle: \(error.localizedDescription)"
                     showError = true
                 }
             }

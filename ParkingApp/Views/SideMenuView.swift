@@ -7,6 +7,7 @@ struct SideMenuView: View {
     @ObservedObject var firestoreManager = FirestoreManager.shared
     @State private var currentUser: User?
     @State private var showLogoutConfirmation = false
+    @State private var showMyVehicles = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -62,7 +63,7 @@ struct SideMenuView: View {
                 // Future: Navigate to bookings
             }
             ButtonRow(title: "My Vehicles", systemImage: "car.fill") {
-                // Future: Navigate to vehicles
+                showMyVehicles = true
             }
             ButtonRow(title: "Settings", systemImage: "gearshape") {
                 // Future: Navigate to settings
@@ -100,6 +101,9 @@ struct SideMenuView: View {
         .shadow(color: Color.black.opacity(0.15), radius: 10, x: 6, y: 0)
         .accessibilityIdentifier("SideMenuView")
         .offset(CGSize(width: -10.0, height: 0.0))
+        .sheet(isPresented: $showMyVehicles) {
+            MyVehiclesView()
+        }
         .onAppear {
             loadUserInfo()
         }

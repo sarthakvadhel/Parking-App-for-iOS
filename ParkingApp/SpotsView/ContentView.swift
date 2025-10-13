@@ -58,7 +58,8 @@ struct ContentView: View {
                 } else {
                     userMainView
                         .sheet(isPresented: $showVehicleRegistration) {
-                            VehicleRegistrationView()
+                            VehicleRegistrationView(isOptional: false)
+                                .interactiveDismissDisabled(true)
                                 .onDisappear {
                                     hasCheckedRegistration = false
                                 }

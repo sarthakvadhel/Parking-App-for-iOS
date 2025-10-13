@@ -97,6 +97,31 @@ class FirestoreManager: ObservableObject {
         return snapshot.documents.first.flatMap { try? $0.data(as: Vehicle.self) }
     }
     
+    func updateVehicle(_ vehicle: Vehicle) async throws {
+        guard let vehicleId = vehicle.id else {
+            throw NSError(domain: "FirestoreManager", code: 4, userInfo: [NSLocalizedDescriptionKey: "Vehicle ID is required"])
+        }
+        try db.collection("vehicles").document(vehicleId).setData(from: vehicle, merge: true)
+        
+        // Update current vehicle if it's the one being updated
+        if currentVehicle?.id == vehicleId {
+            await MainActor.run {
+                self.currentVehicle = vehicle
+            }
+        }
+    }
+    
+    func deleteVehicle(_ vehicleId: String) async throws {
+        try await db.collection("vehicles").document(vehicleId).delete()
+        
+        // Clear current vehicle if it's the one being deleted
+        if currentVehicle?.id == vehicleId {
+            await MainActor.run {
+                self.currentVehicle = nil
+            }
+        }
+    }
+    
     // MARK: - Parking Lot Operations
     
     func createParkingLot(_ parkingLot: ParkingLot) async throws -> String {

@@ -48,6 +48,13 @@ class FirestoreManager: ObservableObject {
         }
     }
     
+    func deleteUser(userId: String) async throws {
+        try await db.collection("users").document(userId).delete()
+        await MainActor.run {
+            self.currentUser = nil
+        }
+    }
+    
     // MARK: - Vehicle Operations
     
     func createVehicle(_ vehicle: Vehicle) async throws -> String {
@@ -223,5 +230,22 @@ class FirestoreManager: ObservableObject {
             throw NSError(domain: "FirestoreManager", code: 6, userInfo: [NSLocalizedDescriptionKey: "Payment ID is required"])
         }
         try db.collection("payments").document(paymentId).setData(from: payment, merge: true)
+    }
+    
+    // MARK: - User Preferences Operations
+    
+    func fetchUserPreferences(userId: String) async throws -> UserPreferences {
+        let document = try await db.collection("userPreferences").document(userId).getDocument()
+        if let prefs = try? document.data(as: UserPreferences.self) {
+            return prefs
+        }
+        // Return default preferences if none exist
+        return UserPreferences(userId: userId)
+    }
+    
+    func updateUserPreferences(_ preferences: UserPreferences) async throws {
+        var updatedPrefs = preferences
+        updatedPrefs.updatedAt = Date()
+        try db.collection("userPreferences").document(preferences.userId).setData(from: updatedPrefs, merge: true)
     }
 }

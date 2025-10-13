@@ -17,6 +17,7 @@ struct SignupView: View {
     @State private var errorMessage = ""
     @State private var showSuccess = false
     @State private var isLoading = false
+    @State private var showProfileSetup = false
     
     @StateObject var authManager = AuthManager.shared
     @Binding var currentShowingView: String
@@ -76,8 +77,9 @@ struct SignupView: View {
                                 
                                 showSuccess = true
                                 
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                                     showSuccess = false
+                                    showProfileSetup = true
                                 }
                             } catch {
                                 errorMessage = "Failed to save login credentials"
@@ -240,6 +242,9 @@ struct SignupView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Account created successfully!")
+        }
+        .sheet(isPresented: $showProfileSetup) {
+            ProfileSetupView(isOptional: false)
         }
     }
 }

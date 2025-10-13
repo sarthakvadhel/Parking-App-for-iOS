@@ -50,5 +50,9 @@
 	<string>We need your location to show nearby parking spots and help you navigate to your parking destination.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need your location to show nearby parking spots and provide better parking recommendations.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to take profile pictures.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to select profile pictures.</string>
 </dict>
 </plist>

@@ -15,6 +15,7 @@ class ParkingFinder: NSObject, ObservableObject {
     @Published var selectedPlace: ParkingItem?
     @Published var showDetail = false
     @Published var isLoading = false
+    @Published var userLocation: CLLocation?
     
     @Published var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(
@@ -157,13 +158,50 @@ class ParkingFinder: NSObject, ObservableObject {
             center: location,
             span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
     }
+    
+    /// Calculate distance from user location to a parking spot
+    func distanceToSpot(_ spot: ParkingItem) -> Double? {
+        guard let userLocation = userLocation else { return nil }
+        let spotLocation = CLLocation(latitude: spot.location.latitude, longitude: spot.location.longitude)
+        return userLocation.distance(from: spotLocation)
+    }
+    
+    /// Get spots sorted by distance from user
+    var spotsSortedByDistance: [ParkingItem] {
+        guard userLocation != nil else { return spots }
+        return spots.sorted { spot1, spot2 in
+            let dist1 = distanceToSpot(spot1) ?? Double.infinity
+            let dist2 = distanceToSpot(spot2) ?? Double.infinity
+            return dist1 < dist2
+        }
+    }
+    
+    /// Get the nearest parking spot
+    var nearestSpot: ParkingItem? {
+        return spotsSortedByDistance.first
+    }
+    
+    /// Format distance for display
+    func formattedDistance(to spot: ParkingItem) -> String {
+        guard let distance = distanceToSpot(spot) else { return "" }
+        if distance < 1000 {
+            return String(format: "%.0f m", distance)
+        } else {
+            return String(format: "%.1f km", distance / 1000)
+        }
+    }
 }
 
 extension ParkingFinder: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
+        userLocation = location
         updateRegionToUserLocation(location.coordinate)
-        locationManager.stopUpdatingLocation()
+        
+        // Auto-select nearest parking spot if no selection exists
+        if selectedPlace == nil, let nearest = nearestSpot {
+            selectedPlace = nearest
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {

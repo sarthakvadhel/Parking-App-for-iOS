@@ -18,6 +18,7 @@ struct PaymentView: View {
     @State private var isProcessing = false
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var bookingCompleted = false
     
     var totalAmount: Double {
         selectedHour/2 * perHourFee
@@ -34,23 +35,40 @@ struct PaymentView: View {
                     .foregroundColor(Color.theme.textSecondary)
             }
             Spacer()
-            Button(action: {
-                showPaymentOptions = true
-            }, label: {
-                if isProcessing {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
-                        .frame(width: 180, height: 60)
-                } else {
-                    Text("Book Now")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.black)
-                        .frame(width: 180, height: 60)
-                }
-            })
-            .background(Color.yellowColor)
-            .cornerRadius(20)
-            .disabled(isProcessing)
+            
+            if bookingCompleted {
+                Button(action: {
+                    openDirections()
+                }, label: {
+                    HStack {
+                        Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
+                        Text("Directions")
+                    }
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 180, height: 60)
+                })
+                .background(Color.blue)
+                .cornerRadius(20)
+            } else {
+                Button(action: {
+                    showPaymentOptions = true
+                }, label: {
+                    if isProcessing {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                            .frame(width: 180, height: 60)
+                    } else {
+                        Text("Book Now")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.black)
+                            .frame(width: 180, height: 60)
+                    }
+                })
+                .background(Color.yellowColor)
+                .cornerRadius(20)
+                .disabled(isProcessing)
+            }
         }
         .sheet(isPresented: $showPaymentOptions) {
             PaymentOptionsView(
@@ -58,6 +76,7 @@ struct PaymentView: View {
                 selectedHour: selectedHour/2,
                 parkingItem: parkingItem,
                 onBookingComplete: {
+                    bookingCompleted = true
                     showBookingConfirmation = true
                 }
             )
@@ -68,9 +87,25 @@ struct PaymentView: View {
             Text(errorMessage)
         }
         .alert("Booking Confirmed!", isPresented: $showBookingConfirmation) {
+            Button("Get Directions", role: .none) {
+                openDirections()
+            }
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Your parking space has been booked successfully!")
+            Text("Your parking space has been booked successfully! Tap 'Get Directions' to navigate to the parking spot.")
+        }
+    }
+    
+    private func openDirections() {
+        guard let parkingItem = parkingItem else { return }
+        
+        let latitude = parkingItem.location.latitude
+        let longitude = parkingItem.location.longitude
+        let name = parkingItem.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "Parking"
+        
+        // Open Apple Maps with directions
+        if let url = URL(string: "http://maps.apple.com/?daddr=\(latitude),\(longitude)&dirflg=d&t=m&q=\(name)") {
+            UIApplication.shared.open(url)
         }
     }
 }

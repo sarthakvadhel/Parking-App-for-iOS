@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ParkingCardView: View {
     let parkingPlace: ParkingItem
+    @EnvironmentObject var parkingFinder: ParkingFinder
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 8) {
@@ -30,6 +32,16 @@ struct ParkingCardView: View {
                         .foregroundColor(Color.theme.iconSecondary)
                     Text("₹\(String.init(format: "%0.2f", parkingPlace.fee))/h")
                         .foregroundColor(Color.theme.textPrimary)
+                    
+                    // Show distance if user location is available
+                    if parkingFinder.userLocation != nil {
+                        Spacer()
+                        Image(systemName: "location.fill")
+                            .foregroundColor(.blue)
+                        Text(parkingFinder.formattedDistance(to: parkingPlace))
+                            .foregroundColor(.blue)
+                            .font(.system(size: 14, weight: .semibold))
+                    }
                 }
             }
             

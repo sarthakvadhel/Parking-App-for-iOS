@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct SearchView: View {
     @State private var showSearch = false
+    @EnvironmentObject var parkingFinder: ParkingFinder
     
     var body: some View {
         Button(action: {
@@ -31,23 +33,30 @@ struct SearchView: View {
         }
         .sheet(isPresented: $showSearch) {
             ParkingSearchView()
+                .environmentObject(parkingFinder)
         }
     }
 }
 
 struct ParkingSearchView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var parkingFinder: ParkingFinder
     @State private var searchText = ""
     @State private var parkingLots: [ParkingItem] = []
     @State private var isLoading = false
     
     var filteredLots: [ParkingItem] {
-        if searchText.isEmpty {
-            return parkingLots
-        }
-        return parkingLots.filter {
+        let filtered = searchText.isEmpty ? parkingLots : parkingLots.filter {
             $0.name.localizedCaseInsensitiveContains(searchText) ||
             $0.address.localizedCaseInsensitiveContains(searchText)
+        }
+        
+        // Sort by distance from user location
+        guard parkingFinder.userLocation != nil else { return filtered }
+        return filtered.sorted { spot1, spot2 in
+            let dist1 = parkingFinder.distanceToSpot(spot1) ?? Double.infinity
+            let dist2 = parkingFinder.distanceToSpot(spot2) ?? Double.infinity
+            return dist1 < dist2
         }
     }
     
@@ -91,9 +100,15 @@ struct ParkingSearchView: View {
                     Spacer()
                 } else {
                     List(filteredLots) { lot in
-                        SearchResultRow(parkingItem: lot)
+                        SearchResultRow(parkingItem: lot, parkingFinder: parkingFinder)
                             .onTapGesture {
-                                // Future: Navigate to detail
+                                // Select the parking spot and navigate back
+                                parkingFinder.selectedPlace = lot
+                                // Center map on selected spot
+                                parkingFinder.region = MKCoordinateRegion(
+                                    center: lot.location,
+                                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+                                )
                                 dismiss()
                             }
                     }
@@ -152,6 +167,7 @@ struct ParkingSearchView: View {
 
 struct SearchResultRow: View {
     let parkingItem: ParkingItem
+    let parkingFinder: ParkingFinder
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -169,6 +185,18 @@ struct SearchResultRow: View {
                 Text("₹\(String(format: "%.0f", parkingItem.fee))/h")
                     .font(.caption)
                     .foregroundColor(.orange)
+                
+                // Show distance if user location is available
+                if parkingFinder.userLocation != nil {
+                    Spacer()
+                    HStack(spacing: 4) {
+                        Image(systemName: "location.fill")
+                            .font(.caption)
+                        Text(parkingFinder.formattedDistance(to: parkingItem))
+                    }
+                    .font(.caption)
+                    .foregroundColor(.blue)
+                }
             }
         }
         .padding(.vertical, 8)

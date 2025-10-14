@@ -180,8 +180,13 @@ struct ContentView: View {
         }
         .onAppear {
             // Safe initialization of selected place
-            if parkingFinder.selectedPlace == nil, let firstSpot = parkingFinder.spots.first {
-                parkingFinder.selectedPlace = firstSpot
+            if parkingFinder.selectedPlace == nil {
+                // If user location is available, select nearest spot
+                if let nearest = parkingFinder.nearestSpot {
+                    parkingFinder.selectedPlace = nearest
+                } else if let firstSpot = parkingFinder.spots.first {
+                    parkingFinder.selectedPlace = firstSpot
+                }
             }
         }
     }
@@ -192,6 +197,7 @@ struct ContentView: View {
             // map view
             Map(
                 coordinateRegion: $parkingFinder.region,
+                showsUserLocation: true,
                 annotationItems: parkingFinder.spots
             ) { spot in
                 MapAnnotation(
@@ -225,6 +231,7 @@ struct ContentView: View {
                 // parking card view - safe access with nil coalescing
                 if let displayPlace = parkingFinder.selectedPlace ?? parkingFinder.spots.first {
                     ParkingCardView(parkingPlace: displayPlace)
+                        .environmentObject(parkingFinder)
                         .offset(y: -30)
                         .onTapGesture {
                             parkingFinder.showDetail = true
@@ -233,6 +240,7 @@ struct ContentView: View {
                 
                 // search view
                 SearchView()
+                    .environmentObject(parkingFinder)
             }
             .padding(.horizontal)
             

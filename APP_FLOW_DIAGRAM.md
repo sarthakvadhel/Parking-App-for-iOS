@@ -20,8 +20,8 @@
     │ Welcome Screen   │      │ Auth Check   │
     │ (Onboarding)     │      └──────┬───────┘
     └────────┬─────────┘             │
-             │                        │
-             └──────────┬─────────────┘
+             │                       │
+             └──────────┬────────────┘
                         │
                         ▼
               ┌──────────────────┐
@@ -46,14 +46,14 @@
                    │
       ┌────────────┴────────────┐
       │                         │
-   USER│                         │VENDOR
+  USER│                         │VENDOR
       ▼                         ▼
 ┌─────────────┐         ┌──────────────────┐
 │ Has Vehicle?│         │ Has Parking Lot? │
 └─────┬───────┘         └────────┬─────────┘
       │                          │
-  NO  │  YES               NO    │    YES
-      ▼   │                      ▼     │
+  NO  │    YES             NO    │    YES
+      ▼     │                      ▼   │
 ┌──────────┐│              ┌──────────┐│
 │ Vehicle  ││              │  Lot     ││
 │ Register ││              │ Register ││
@@ -206,30 +206,30 @@
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    SwiftUI Views                     │
-│  - ContentView                                       │
-│  - VendorDashboard                                   │
-│  - UserMainView                                      │
+│                    SwiftUI Views                    │
+│  - ContentView                                      │
+│  - VendorDashboard                                  │
+│  - UserMainView                                     │
 └───────────────────────┬─────────────────────────────┘
                         │
                         ▼
 ┌─────────────────────────────────────────────────────┐
-│                  View Models                         │
-│  - ParkingFinder (ObservableObject)                  │
+│                  View Models                        │
+│  - ParkingFinder (ObservableObject)                 │
 │  - VendorDashboardViewModel                         │
 └───────────────────────┬─────────────────────────────┘
                         │
                         ▼
 ┌─────────────────────────────────────────────────────┐
-│                    Services                          │
-│  - FirestoreManager (Singleton)                      │
+│                    Services                         │
+│  - FirestoreManager (Singleton)                     │
 │  - ImageUploadHelper                                │
 └───────────────────────┬─────────────────────────────┘
                         │
                         ▼
 ┌─────────────────────────────────────────────────────┐
-│                 Firebase Backend                     │
-│  - Authentication                                    │
+│                 Firebase Backend                    │
+│  - Authentication                                   │
 │  - Firestore Database                               │
 │  - Cloud Storage                                    │
 └─────────────────────────────────────────────────────┘
@@ -268,7 +268,7 @@
           │
      ┌────┴────┐
      │         │
-  USER│         │VENDOR
+ USER│         │VENDOR
      ▼         ▼
 ┌─────────┐  ┌──────────┐
 │ Vehicle │  │ Parking  │
@@ -343,24 +343,24 @@
 
 ```
 ┌─────────────────────────────────────┐
-│        @Published Properties         │
-│  - Automatic UI updates              │
-│  - Reactive data binding             │
+│        @Published Properties        │
+│  - Automatic UI updates             │
+│  - Reactive data binding            │
 └──────────────────┬──────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────┐
-│         @AppStorage                  │
-│  - User ID persistence               │
-│  - User Role persistence             │
-│  - Welcome screen flag               │
+│         @AppStorage                 │
+│  - User ID persistence              │
+│  - User Role persistence            │
+│  - Welcome screen flag              │
 └──────────────────┬──────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────┐
-│      Firestore Documents             │
-│  - Long-term data storage            │
-│  - Cross-device sync                 │
+│      Firestore Documents            │
+│  - Long-term data storage           │
+│  - Cross-device sync                │
 └─────────────────────────────────────┘
 ```
 
@@ -369,22 +369,22 @@
 ```
 ┌──────────────┐     ┌──────────────┐
 │ TopNavView   │────▶│ FirestoreMan.│
-│ (Vehicle)    │     │ (Load Vehicle)
+│ (Vehicle)    │     │(Load Vehicle)|
 └──────────────┘     └──────────────┘
 
 ┌──────────────┐     ┌──────────────┐
 │ SearchView   │────▶│ ParkingFinder│
-│              │     │ (Filter Lots) │
+│              │     │(Filter Lots) │
 └──────────────┘     └──────────────┘
 
 ┌──────────────┐     ┌──────────────┐
 │ PaymentView  │────▶│ FirestoreMan.│
-│              │     │ (Create Book.)
+│              │     │(Create Book.)|
 └──────────────┘     └──────────────┘
 
 ┌──────────────┐     ┌──────────────┐
 │ VendorDash.  │────▶│ FirestoreMan.│
-│              │     │ (Fetch Lots)  │
+│              │     │ (Fetch Lots) │
 └──────────────┘     └──────────────┘
 ```
 
